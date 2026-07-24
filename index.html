@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>FORRT Reviewer Browser</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;450;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header>
+      <div class="brand">
+        <span class="eyebrow">Framework for Open and Reproducible Research Training</span>
+        <h1>Reviewer Browser</h1>
+      </div>
+      <div class="header-status" hidden id="headerStatus">
+        <p id="meta" class="status"></p>
+        <button type="button" id="lock" class="lock-btn" title="Forget the saved password and lock">Lock</button>
+      </div>
+    </header>
+
+    <!-- Pre-unlock gate -->
+    <section id="gate">
+      <div class="gate-card">
+        <span class="eyebrow">Encrypted · decrypts in your browser</span>
+        <h2>Find a reviewer by their evidence</h2>
+        <p>Paste a manuscript abstract and rank FORRT contributors by how closely
+          their published work matches it — never by their name. Enter the shared
+          password to decrypt the reviewer set locally; nothing leaves your device.</p>
+        <form id="unlockForm" method="post" action="#">
+          <input type="text" name="username" value="forrt-team" autocomplete="username" readonly hidden aria-hidden="true" tabindex="-1">
+          <input id="password" type="password" name="password" autocomplete="current-password" placeholder="Shared password" required>
+          <button type="submit">Unlock</button>
+        </form>
+        <p id="gateStatus" class="gate-status" role="status" aria-live="polite"></p>
+      </div>
+    </section>
+
+    <main hidden id="app">
+      <div class="toolbar">
+        <section class="semantic">
+          <label for="abstract" class="field-label">Match by abstract</label>
+          <textarea id="abstract" rows="3" placeholder="Paste a manuscript abstract, then Find reviewers. Contributors are ranked by how closely their published work matches — their names are never used."></textarea>
+          <div class="semantic-actions">
+            <button type="button" id="findReviewers">Find reviewers</button>
+            <button type="button" id="clearSemantic" class="ghost" hidden>Clear ranking</button>
+            <span id="semanticStatus" class="semantic-status" role="status" aria-live="polite"></span>
+          </div>
+        </section>
+
+        <section class="controls">
+          <label class="field-label" for="query">Filter</label>
+          <input id="query" type="search" placeholder="Name, topic, method, project…">
+          <div class="control-row">
+            <label class="inline check">
+              <input id="hideExcluded" type="checkbox" checked>
+              Hide excluded
+            </label>
+          </div>
+        </section>
+      </div>
+
+      <div class="layout">
+        <div class="results">
+          <div id="count" class="pane-head"></div>
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th id="matchCol" class="c-match" hidden>Match</th>
+                  <th>Contributor</th>
+                  <th class="c-affil">Affiliation</th>
+                  <th>Profile</th>
+                </tr>
+              </thead>
+              <tbody id="rows"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <aside id="detail">
+          <div class="detail-empty">
+            <span class="eyebrow">No contributor selected</span>
+            <p>Pick a row to see the full profile — research topics, methods, project roles, and the evidence behind the match.</p>
+          </div>
+        </aside>
+      </div>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
