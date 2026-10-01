@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Remove me · FORRT Reviewer Database</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;450;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header>
+      <div class="brand">
+        <span class="eyebrow">Framework for Open and Reproducible Research Training</span>
+        <h1>Reviewer Database</h1>
+      </div>
+    </header>
+    <section id="gate">
+      <div class="gate-card">
+        <h2>Remove me from the reviewer database</h2>
+        <p>Click the button to be removed. We will remove your profile from the
+          database and will not share it with partner journals. We keep only your
+          ORCID iD on an exclusion list, so that future updates of the database do
+          not add you again.</p>
+        <button type="button" id="remove">Remove me</button>
+        <p id="status" class="gate-status" role="status" aria-live="polite"></p>
+      </div>
+    </section>
+    <script>
+      // Removals go to the shared FORRT collect endpoint (one row per click);
+      // `scripts/notice.py apply` reads them back by token.
+      const ENDPOINT = "https://script.google.com/macros/s/AKfycbyx858xfSCgHQ8RmbfbMsdzcmzrkNs_JZVmqeEBVrH-S6g8YJbI32CY7if-k8oTzg-eyQ/exec";
+      const PROJECT = "forrt-reviewer-notice-2026";
+      const token = new URLSearchParams(location.search).get("t");
+      const button = document.querySelector("#remove");
+      const status = document.querySelector("#status");
+      const FALLBACK = "Please reply to the email you received and we will remove you by hand.";
+
+      if (!token) {
+        button.disabled = true;
+        status.textContent = "This link is incomplete. " + FALLBACK;
+      }
+
+      async function recorded() {
+        for (let attempt = 0; attempt < 4; attempt += 1) {
+          await new Promise((resolve) => setTimeout(resolve, 1500 * (attempt + 1)));
+          try {
+            const response = await fetch(`${ENDPOINT}?action=rows&project=${PROJECT}`);
+            const data = await response.json();
+            if (data.rows.some((row) => row.itemId === token && row.vote === "remove")) return true;
+          } catch {}
+        }
+        return false;
+      }
+
+      button.addEventListener("click", async () => {
+        button.disabled = true;
+        status.textContent = "Removing…";
+        try {
+          await fetch(ENDPOINT, {
+            method: "POST",
+            mode: "no-cors",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify({ project: PROJECT, itemId: token, vote: "remove" }),
+          });
+        } catch {}
+        status.textContent = (await recorded())
+          ? "Done. You have been removed from the reviewer database."
+          : "We could not confirm your removal. " + FALLBACK;
+      });
+    </script>
+  </body>
+</html>
